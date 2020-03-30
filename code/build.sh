@@ -1,15 +1,12 @@
 
 curDir=$(pwd)
-buildDir="$curDir/../build"
-dataDir="$curDir/../data"
+compileDir="$curDir/.."
 
-CommonCompilerFlags="-g -ggdb -std=c99 -msse4.1 -ffast-math -Wno-braced-scalar-init -Wno-format -Wno-writable-strings -Wno-switch -Wno-unused-value"
-CommonDefines="-DCOMPILE_INTERNAL=1 -DCOMPILE_SLOW=1 -DCOMPILE_LINUX=1"
-CommonLinkerFlags="-pthread -lX11 -ldl -lGL -lraylib"
+ZigPath=/home/hugo/Téléchargements/zig-linux-x86_64-0.5.0+c70471fae/zig
 
-pushd $buildDir > /dev/null
+pushd $compileDir > /dev/null
 
 echo "Building Unix..."
-~/dev/zig/build/zig cc $CommonCompilerFlags $CommonDefines $curDir/brain.c -o brain $CommonLinkerFlags
+$ZigPath build
 
 popd > /dev/null
