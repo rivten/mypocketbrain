@@ -14,7 +14,8 @@ pub fn build(b: *std.build.Builder) void {
     var exe = b.addExecutable("brain", null);
     exe.setBuildMode(mode);
     exe.setOutputDir("build/");
-    exe.addCSourceFile("code/brain.c", &[_][]const u8{"-std=c99"});
+    exe.addCSourceFile("code/brain.c", &[_][]const u8{ "-std=c99", "-Wno-visibility" });
+    exe.addCSourceFile("code/gb_compile.c", &[_][]const u8{ "-std=c99", "-Wno-visibility", "-Wno-incompatible-pointer-types" });
 
     if (is_windows) {
         exe.linkSystemLibrary("user32");
