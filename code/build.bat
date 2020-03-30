@@ -1,5 +1,7 @@
 @echo off
 
+set ZigExePath=C:\zig\zig.exe
+
 echo Building Win32...
 
 pushd ..

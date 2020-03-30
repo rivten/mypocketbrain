@@ -2,7 +2,7 @@ const std = @import("std");
 const builtin = @import("builtin");
 
 const RaylibIncludeDir = "C:/raylib/include";
-const RaylibLibraryPath = "C:/raylib/lib/raylib.lib";
+const RaylibLibraryPath = "C:/raylib/lib/raylib";
 
 const is_windows = std.Target.current.os.tag == std.Target.Os.Tag.windows;
 
