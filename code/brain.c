@@ -2,6 +2,9 @@
 
 #include "gb.h"
 
+#include "nuklear_compile_flags.h"
+#include "nuklear.h"
+
 #define MAX_WORD_LEN 64
 
 typedef struct word
@@ -10,6 +13,8 @@ typedef struct word
 	u32 PosX;
 	u32 PosY;
 } word;
+
+#include "gui.h"
 
 int main(void)
 {
@@ -23,14 +28,16 @@ int main(void)
 	u32 WordCount = 0;
 	word Words[16] = {0};
 
-	u32 FontSize = 26;
+	u32 FontSize = GuiFontSize;
 	const char* IntroText = "Enter word : ";
 
 	u32 EnterTextBufferCount = 0;
 	char EnterTextBuffer[MAX_WORD_LEN] = {0};
+	struct nk_context* GuiContext = NuklearInit();
 
     while (!WindowShouldClose())
     {
+		NuklearGatherInput(GuiContext);
 		if(IsKeyPressed(KEY_ENTER))
 		{
 			if(EnterTextBufferCount > 0)
@@ -74,22 +81,27 @@ int main(void)
 			++EnterTextBufferCount;
 		}
 
+		NuklearDisplay(GuiContext);
+
 		{
 			BeginDrawing();
 
 			ClearBackground(RAYWHITE);
-			int IntroTextSize = MeasureText(IntroText, FontSize);
-			DrawText(IntroText, 10, 10, FontSize, BLACK);
-			DrawText(EnterTextBuffer, 10 + IntroTextSize, 10, 26, BLACK);
+			int IntroTextSize = MeasureTextEx(GuiRLFont_, IntroText, FontSize, 1.0f).x;
+			DrawTextEx(GuiRLFont_, IntroText, cast(Vector2) {10, 10}, FontSize, 1.0f, BLACK);
+			DrawTextEx(GuiRLFont_, EnterTextBuffer, cast(Vector2) {10 + IntroTextSize, 10}, FontSize, 1.0f, BLACK);
 			for(u32 WordIndex = 0; WordIndex < WordCount; ++WordIndex)
 			{
 				word* Word = Words + WordIndex;
-				DrawText(Word->Text, Word->PosX, Word->PosY, FontSize, BLACK);
+				DrawTextEx(GuiRLFont_, Word->Text, cast(Vector2) {Word->PosX, Word->PosY}, FontSize, 1.0f, BLACK);
 			}
+
+			NuklearRender(GuiContext);
 
 			EndDrawing();
 		}
     }
+	NuklearFree(GuiContext);
 
     CloseWindow();
 
