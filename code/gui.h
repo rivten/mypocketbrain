@@ -3,6 +3,7 @@ static const int GuiFontSize = 16;
 static struct nk_context GuiContext_ = {0};
 static struct nk_user_font GuiNKFont_ = {0};
 static Font GuiRLFont_ = {0};
+static struct nk_colorf NuklearColor = {0};
 
 float GetTextWidth(nk_handle handle, float h, const char* t, int len)
 {
@@ -62,6 +63,7 @@ static void NuklearGatherInput(struct nk_context* Context)
 		MouseButton Button = Buttons[ButtonIndex];
 		nk_input_button(Context, RaylibButtonToNuklearButton(Button), MouseX, MouseY, IsMouseButtonDown(Button));
 	}
+	nk_input_scroll(Context, cast(struct nk_vec2){0, GetMouseWheelMove()});
 	nk_input_end(Context);
 }
 
@@ -188,7 +190,13 @@ static void NuklearRender(struct nk_context* Context, u32 ScreenWidth, u32 Scree
 			} break;
 			case NK_COMMAND_RECT_MULTI_COLOR: 
 			{
-				printf("NK_COMMAND_RECT_MULTI_COLOR\n");
+				const struct nk_command_rect_multi_color* r = (const struct nk_command_rect_multi_color *)Command;
+				// NOTE(hugo): It just works ! Don't touch it :)
+				Color col1 = NuklearColorToRaylibColor(r->left);
+				Color col2 = NuklearColorToRaylibColor(r->bottom);
+				Color col3 = NuklearColorToRaylibColor(r->right);
+				Color col4 = NuklearColorToRaylibColor(r->top);
+				DrawRectangleGradientEx(cast(Rectangle) {r->x, r->y, r->w, r->h}, col1, col2, col3, col4);
 			} break;
 			case NK_COMMAND_ARC: 
 			{
@@ -248,6 +256,9 @@ static void NuklearDisplay(struct nk_context* Context)
 		nk_layout_row_dynamic(Context, 30, 1);
 		nk_label(Context, "Volume:", NK_TEXT_LEFT);
 		nk_slider_float(Context, 0, &value, 1.0f, 0.1f);
+		nk_layout_row_dynamic(Context, 60, 1);
+		nk_color_pick(Context, &NuklearColor, NK_RGB);
+		DrawRectangle(300, 300, 20, 20, NuklearColorToRaylibColor(nk_rgb_cf(NuklearColor)));
 #if 1
 		// custom widget pixel width
 		nk_layout_row_begin(Context, NK_STATIC, 30, 2);
