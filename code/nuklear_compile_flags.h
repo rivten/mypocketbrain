@@ -3,3 +3,6 @@
 #define NK_INCLUDE_FIXED_TYPES
 #define NK_NO_STB
 #define NK_NO_UB
+#include <stdio.h>
+#define NK_INCLUDE_STANDARD_VARARGS
+

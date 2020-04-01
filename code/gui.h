@@ -7,7 +7,7 @@ static struct nk_colorf NuklearColor = {0};
 
 float GetTextWidth(nk_handle handle, float h, const char* t, int len)
 {
-	return MeasureTextEx(GuiRLFont_, t, GuiFontSize, 1.0f).x;
+	return MeasureTextEx(GuiRLFont_, TextSubtext(t, 0, len), GuiFontSize, 0.0f).x;
 }
 
 static struct nk_context* NuklearInit()
@@ -64,6 +64,23 @@ static void NuklearGatherInput(struct nk_context* Context)
 		nk_input_button(Context, RaylibButtonToNuklearButton(Button), MouseX, MouseY, IsMouseButtonDown(Button));
 	}
 	nk_input_scroll(Context, cast(struct nk_vec2){0, GetMouseWheelMove()});
+	for(int Key = KEY_A; Key <= KEY_Z; ++Key)
+	{
+		if(IsKeyPressed(Key))
+		{
+			nk_input_char(Context, Key - KEY_A + 'a');
+		}
+	}
+	nk_input_key(Context, NK_KEY_SHIFT, IsKeyPressed(KEY_LEFT_SHIFT) || IsKeyPressed(KEY_RIGHT_SHIFT));
+	nk_input_key(Context, NK_KEY_CTRL, IsKeyPressed(KEY_LEFT_CONTROL) || IsKeyPressed(KEY_RIGHT_CONTROL));
+	nk_input_key(Context, NK_KEY_DEL, IsKeyPressed(KEY_DELETE));
+	nk_input_key(Context, NK_KEY_ENTER, IsKeyPressed(KEY_ENTER));
+	nk_input_key(Context, NK_KEY_TAB, IsKeyPressed(KEY_TAB));
+	nk_input_key(Context, NK_KEY_BACKSPACE, IsKeyPressed(KEY_BACKSPACE));
+	nk_input_key(Context, NK_KEY_UP, IsKeyPressed(KEY_UP));
+	nk_input_key(Context, NK_KEY_DOWN, IsKeyPressed(KEY_DOWN));
+	nk_input_key(Context, NK_KEY_LEFT, IsKeyPressed(KEY_LEFT));
+	nk_input_key(Context, NK_KEY_RIGHT, IsKeyPressed(KEY_RIGHT));
 	nk_input_end(Context);
 }
 
@@ -182,7 +199,12 @@ static void NuklearRender(struct nk_context* Context, u32 ScreenWidth, u32 Scree
 			{
 				const struct nk_command_text *t = (const struct nk_command_text*)Command;
 				color = NuklearColorToRaylibColor(t->foreground);
-				DrawTextEx(GuiRLFont_, (const char*)t->string, cast(Vector2) {t->x, t->y}, GuiFontSize, 1.0f, color);
+				DrawTextEx(GuiRLFont_, (const char*)t->string, cast(Vector2) {t->x, t->y}, GuiFontSize, 0.0f, color);
+#if 0
+				// NOTE(hugo): Debugging text rects
+				Vector2 TextRect = MeasureTextEx(GuiRLFont_, (const char*)t->string, GuiFontSize, 0.0f);
+				DrawRectangleLines(t->x, t->y, TextRect.x, TextRect.y, RED);
+#endif
 			} break;
 			case NK_COMMAND_CURVE: 
 			{
@@ -228,49 +250,4 @@ static void NuklearRender(struct nk_context* Context, u32 ScreenWidth, u32 Scree
 	EndScissorMode();
 }
 
-static void NuklearDisplay(struct nk_context* Context)
-{
-	enum {EASY, HARD};
-	static int op = EASY;
-	static float value = 0.6f;
-	if(nk_begin(Context, "mypocketbrain", nk_rect(50, 50, 300, 300), 
-				NK_WINDOW_BORDER|NK_WINDOW_SCALABLE|NK_WINDOW_MINIMIZABLE))
-	{
-		// fixed widget pixel width
-		nk_layout_row_dynamic(Context, 30, 1);
-		if (nk_button_label(Context, "button")) 
-		{
-			// event handling
-		}
-		// fixed widget window ratio width
-		nk_layout_row_dynamic(Context, 30, 2);
-		if (nk_option_label(Context, "easy", op == EASY)) 
-		{
-			op = EASY;
-		}
-		if (nk_option_label(Context, "hard", op == HARD))
-		{
-			op = HARD;
-		}
-
-		nk_layout_row_dynamic(Context, 30, 1);
-		nk_label(Context, "Volume:", NK_TEXT_LEFT);
-		nk_slider_float(Context, 0, &value, 1.0f, 0.1f);
-		nk_layout_row_dynamic(Context, 60, 1);
-		nk_color_pick(Context, &NuklearColor, NK_RGB);
-		DrawRectangle(300, 300, 20, 20, NuklearColorToRaylibColor(nk_rgb_cf(NuklearColor)));
-#if 1
-		// custom widget pixel width
-		nk_layout_row_begin(Context, NK_STATIC, 30, 2);
-		{
-			nk_layout_row_push(Context, 100);
-			nk_label(Context, "Volume:", NK_TEXT_LEFT);
-			nk_layout_row_push(Context, 110);
-			nk_slider_float(Context, 0, &value, 1.0f, 0.1f);
-		}
-		nk_layout_row_end(Context);
-#endif
-	}
-	nk_end(Context);
-}
 
