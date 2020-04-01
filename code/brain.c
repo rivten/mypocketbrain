@@ -11,8 +11,6 @@
 typedef struct word
 {
 	char Text[MAX_WORD_LEN];
-	u32 PosX;
-	u32 PosY;
 } word;
 
 #include "gui.h"
@@ -49,8 +47,6 @@ int main(void)
 				{
 					ASSERT(WordCount < count_of(Words));
 					word* W = Words + WordCount;
-					W->PosX = 10;
-					W->PosY = FontSize * (WordCount + 2);
 					for(u32 CharIndex = 0; CharIndex < MAX_WORD_LEN; ++CharIndex)
 					{
 						W->Text[CharIndex] = EnterTextBuffer[CharIndex];
