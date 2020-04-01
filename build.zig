@@ -15,7 +15,6 @@ pub fn build(b: *std.build.Builder) void {
     exe.setBuildMode(mode);
     exe.setOutputDir("build/");
     exe.addCSourceFile("code/brain.c", &[_][]const u8{"-std=c99"});
-    exe.addCSourceFile("code/gb_compile.c", &[_][]const u8{ "-std=c99", "-Wno-incompatible-pointer-types" });
     exe.addCSourceFile("code/nuklear_compile.c", &[_][]const u8{ "-std=c99", "-Wno-implicit-function-declaration", "-Wno-implicit-int", "-Wno-int-conversion" });
 
     if (is_windows) {

@@ -1,9 +1,10 @@
 #include "raylib.h"
 
-#include "gb.h"
-
 #include "nuklear_compile_flags.h"
 #include "nuklear.h"
+
+#define COMMON_IMPLEMENTATION
+#include "common.h"
 
 #define MAX_WORD_LEN 64
 
@@ -18,10 +19,11 @@ typedef struct word
 
 int main(void)
 {
-    const int screenWidth = 800;
-    const int screenHeight = 450;
+    const int ScreenWidth = 800;
+    const int ScreenHeight = 450;
 
-    InitWindow(screenWidth, screenHeight, "mypocketbrain");
+    InitWindow(ScreenWidth, ScreenHeight, "mypocketbrain");
+	SetConfigFlags(FLAG_WINDOW_RESIZABLE|FLAG_VSYNC_HINT);
 
     SetTargetFPS(60);
 
@@ -42,7 +44,7 @@ int main(void)
 		{
 			if(EnterTextBufferCount > 0)
 			{
-				GB_ASSERT(WordCount < gb_count_of(Words));
+				ASSERT(WordCount < count_of(Words));
 				word* W = Words + WordCount;
 				W->PosX = 10;
 				W->PosY = FontSize * (WordCount + 2);
@@ -60,7 +62,7 @@ int main(void)
 		{
 			if(IsKeyPressed(Key))
 			{
-				GB_ASSERT(EnterTextBufferCount < gb_count_of(EnterTextBuffer)); 
+				ASSERT(EnterTextBufferCount < count_of(EnterTextBuffer)); 
 				EnterTextBuffer[EnterTextBufferCount] = Key - KEY_A + 'a';
 				++EnterTextBufferCount;
 			}
@@ -71,12 +73,12 @@ int main(void)
 			{
 				--EnterTextBufferCount;
 			}
-			GB_ASSERT(EnterTextBufferCount < gb_count_of(EnterTextBuffer));
+			ASSERT(EnterTextBufferCount < count_of(EnterTextBuffer));
 			EnterTextBuffer[EnterTextBufferCount] = 0;
 		}
 		if(IsKeyPressed(KEY_SPACE))
 		{
-			GB_ASSERT(EnterTextBufferCount < gb_count_of(EnterTextBuffer));
+			ASSERT(EnterTextBufferCount < count_of(EnterTextBuffer));
 			EnterTextBuffer[EnterTextBufferCount] = ' ';
 			++EnterTextBufferCount;
 		}
@@ -96,7 +98,7 @@ int main(void)
 				DrawTextEx(GuiRLFont_, Word->Text, cast(Vector2) {Word->PosX, Word->PosY}, FontSize, 1.0f, BLACK);
 			}
 
-			NuklearRender(GuiContext);
+			NuklearRender(GuiContext, ScreenWidth, ScreenHeight);
 
 			EndDrawing();
 		}

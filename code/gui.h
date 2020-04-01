@@ -44,7 +44,7 @@ static enum nk_buttons RaylibButtonToNuklearButton(MouseButton RaylibButton)
 		} break;
 		default:
 		{
-			GB_ASSERT(false);
+			ASSERT(false);
 		}
 	}
 	return(NK_BUTTON_MAX);
@@ -57,7 +57,7 @@ static void NuklearGatherInput(struct nk_context* Context)
 	int MouseY = GetMouseY();
 	nk_input_motion(Context, MouseX, MouseY);
 	MouseButton Buttons[] = {MOUSE_LEFT_BUTTON, MOUSE_RIGHT_BUTTON, MOUSE_MIDDLE_BUTTON};
-	for(u32 ButtonIndex = 0; ButtonIndex < gb_count_of(Buttons); ++ButtonIndex)
+	for(u32 ButtonIndex = 0; ButtonIndex < count_of(Buttons); ++ButtonIndex)
 	{
 		MouseButton Button = Buttons[ButtonIndex];
 		nk_input_button(Context, RaylibButtonToNuklearButton(Button), MouseX, MouseY, IsMouseButtonDown(Button));
@@ -75,8 +75,9 @@ static Color NuklearColorToRaylibColor(struct nk_color color)
     return rc;
 }
 
-static void NuklearRender(struct nk_context* Context)
+static void NuklearRender(struct nk_context* Context, u32 ScreenWidth, u32 ScreenHeight)
 {
+	BeginScissorMode(0, 0, ScreenWidth, ScreenHeight);
 	const struct nk_command* Command = 0;
 	nk_foreach(Command, Context)
 	{
@@ -89,6 +90,9 @@ static void NuklearRender(struct nk_context* Context)
 
 			case NK_COMMAND_SCISSOR:
 			{
+				EndScissorMode();
+				const struct nk_command_scissor *s = (const struct nk_command_scissor *)Command;
+				BeginScissorMode(s->x, s->y, s->w, s->h);
 			} break;
 
 			case NK_COMMAND_LINE:
@@ -130,18 +134,19 @@ static void NuklearRender(struct nk_context* Context)
 			{
 				const struct nk_command_triangle *t = (const struct nk_command_triangle*)Command;
 				color = NuklearColorToRaylibColor(t->color);
-				DrawTriangleLines((Vector2){t->a.x, t->a.y}, (Vector2){t->b.x, t->b.y}, (Vector2){t->c.x, t->c.y}, color);
+				DrawTriangleLines((Vector2){t->a.x, t->a.y}, (Vector2){t->c.x, t->c.y}, (Vector2){t->b.x, t->b.y}, color);
 			} break;
 
 			case NK_COMMAND_TRIANGLE_FILLED:
 			{
 				const struct nk_command_triangle_filled *t = (const struct nk_command_triangle_filled*)Command;
 				color = NuklearColorToRaylibColor(t->color);
-				DrawTriangle((Vector2){t->a.x, t->a.y}, (Vector2){t->b.x, t->b.y}, (Vector2){t->c.x, t->c.y}, color);
+				DrawTriangle((Vector2){t->a.x, t->a.y}, (Vector2){t->c.x, t->c.y}, (Vector2){t->b.x, t->b.y}, color);
 			} break;
 
 			case NK_COMMAND_POLYGON:
 			{
+				printf("NK_COMMAND_POLYGON\n");
 #if 0
 				const struct nk_command_polygon *p = (const struct nk_command_polygon*)Command;
 				color = NuklearColorToRaylibColor(p->color);
@@ -157,6 +162,7 @@ static void NuklearRender(struct nk_context* Context)
 
 			case NK_COMMAND_POLYGON_FILLED:
 			{
+				printf("NK_COMMAND_POLYGON_FILLED\n");
 #if 0
 				const struct nk_command_polygon_filled *p = (const struct nk_command_polygon_filled*)Command;
 				color = NuklearColorToRaylibColor(p->color);
@@ -178,32 +184,40 @@ static void NuklearRender(struct nk_context* Context)
 			} break;
 			case NK_COMMAND_CURVE: 
 			{
+				printf("NK_COMMAND_CURVE\n");
 			} break;
 			case NK_COMMAND_RECT_MULTI_COLOR: 
 			{
+				printf("NK_COMMAND_RECT_MULTI_COLOR\n");
 			} break;
 			case NK_COMMAND_ARC: 
 			{
+				printf("NK_COMMAND_ARC\n");
 			} break;
 			case NK_COMMAND_ARC_FILLED: 
 			{
+				printf("NK_COMMAND_ARC_FILLED\n");
 			} break;
 			case NK_COMMAND_POLYLINE: 
 			{
+				printf("NK_COMMAND_POLYLINE\n");
 			} break;
 			case NK_COMMAND_IMAGE: 
 			{
+				printf("NK_COMMAND_IMAGE\n");
 			} break;
 			case NK_COMMAND_CUSTOM: 
 			{
+				printf("NK_COMMAND_CUSTOM\n");
 			} break;
 			default:
 			{
-				GB_ASSERT(false);
+				ASSERT(false);
 			} break;
 		}
 	}
 	nk_clear(Context);
+	EndScissorMode();
 }
 
 static void NuklearDisplay(struct nk_context* Context)
@@ -211,10 +225,11 @@ static void NuklearDisplay(struct nk_context* Context)
 	enum {EASY, HARD};
 	static int op = EASY;
 	static float value = 0.6f;
-	if(nk_begin(Context, "mypocketbrain", nk_rect(50, 50, 300, 300), NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_CLOSABLE))
+	if(nk_begin(Context, "mypocketbrain", nk_rect(50, 50, 300, 300), 
+				NK_WINDOW_BORDER|NK_WINDOW_SCALABLE|NK_WINDOW_MINIMIZABLE))
 	{
 		// fixed widget pixel width
-		nk_layout_row_static(Context, 30, 80, 1);
+		nk_layout_row_dynamic(Context, 30, 1);
 		if (nk_button_label(Context, "button")) 
 		{
 			// event handling
@@ -229,6 +244,11 @@ static void NuklearDisplay(struct nk_context* Context)
 		{
 			op = HARD;
 		}
+
+		nk_layout_row_dynamic(Context, 30, 1);
+		nk_label(Context, "Volume:", NK_TEXT_LEFT);
+		nk_slider_float(Context, 0, &value, 1.0f, 0.1f);
+#if 1
 		// custom widget pixel width
 		nk_layout_row_begin(Context, NK_STATIC, 30, 2);
 		{
@@ -238,6 +258,7 @@ static void NuklearDisplay(struct nk_context* Context)
 			nk_slider_float(Context, 0, &value, 1.0f, 0.1f);
 		}
 		nk_layout_row_end(Context);
+#endif
 	}
 	nk_end(Context);
 }
